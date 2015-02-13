@@ -1,4 +1,0 @@
-<arguments>
-  <Job MaxEvents="20000"  InputFiles="/store/mc/Fall13dr/Neutrino_Pt-2to20_gun/GEN-SIM-RAW/castor_tsg_PU1bx50_POSTLS162_V1-v1/00000/106B7269-8796-E311-B39E-0025905A612E.root,/store/mc/Fall13dr/Neutrino_Pt-2to20_gun/GEN-SIM-RAW/castor_tsg_PU1bx50_POSTLS162_V1-v1/00000/FC00A6A6-8A96-E311-940C-0025905A60CE.root"  SkipEvents="0"  InputBlocks="/Neutrino_Pt-2to20_gun/Fall13dr-castor_tsg_PU1bx50_POSTLS162_V1-v1/GEN-SIM-RAW#69777fd8-9687-11e3-bec1-003048f02d38"  JobID="1" >
-  </Job>
-</arguments>
