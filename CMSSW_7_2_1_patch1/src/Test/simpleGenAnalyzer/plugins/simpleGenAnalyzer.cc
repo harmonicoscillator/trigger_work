@@ -69,7 +69,7 @@ simpleGenAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
   using namespace reco;
   //using namespace pat;
 
-  std::cout<< "i started the analyzer." << std::endl;
+  //std::cout<< "i started the analyzer." << std::endl;
 
   Handle<std::vector<reco::GenParticle> > gen;
   iEvent.getByToken(genToken_,gen);
