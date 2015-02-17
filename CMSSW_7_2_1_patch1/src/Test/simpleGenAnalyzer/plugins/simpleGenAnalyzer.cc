@@ -1,17 +1,5 @@
 // -*- C++ -*-
-//
-// Package:    Test/MiniAnalyzer
-// Class:      MiniAnalyzer
-// 
-/* class MiniAnalyzer MiniAnalyzer.cc Test/MiniAnalyzer/plugins/MiniAnalyzer.cc
-
- Description: [one line class summary]
-
- Implementation:
- [Notes on implementation]
-*/
-// Original Author:  Andrea RIZZI
-// Edited By: Ian Laflotte
+// Original Author:  Ian Laflotte
 //         Created:  Mon, 07 Jul 2014 07:56:38 GMT
 
 // system include files
@@ -47,10 +35,15 @@ private:
   virtual void endJob() override;
 
   edm::EDGetTokenT<std::vector<reco::GenParticle> > genToken_;
+  //const unsigned int MAXSIZE=1000;
   TTree* onlyPhotons_;
-  double pt,eta,phi;
-  double vx,vy,vz;
-  int pdgID;
+  double pt[1000],eta[1000],phi[1000];
+  double vx[1000],vy[1000],vz[1000];
+  int pdgID[1000];
+  int event, run;
+  int nPhotons;
+  double lumi;
+
 };
 
 simpleGenAnalyzer::simpleGenAnalyzer(const edm::ParameterSet& iConfig):
@@ -73,29 +66,42 @@ simpleGenAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSet
 
   Handle<std::vector<reco::GenParticle> > gen;
   iEvent.getByToken(genToken_,gen);
+  nPhotons = 0;
+
+  event = iEvent.id().event();
+  run = iEvent.id().run();
+  lumi = iEvent.id().luminosityBlock();
 
   //trying to find all status 1 photons in the barrel, i.e. eta<=2
   for(size_t i=0; i<gen->size();i++)
     {
-      std::cout<< "i started the loop, i =" << i << std::endl;
+      int flag = 0;      
+      
+      //std::cout<< "i started the loop, i =" << i << std::endl;
       if( (*gen)[i].pdgId() == 22 && (*gen)[i].status() == 1  && abs((*gen)[i].eta()) <= 2)
 	{
-	  
+	  flag = 1;
+
+
 	  const Candidate * photon = &(*gen)[i];
-	  vx      = photon->vx()   ;
-	  vy      = photon->vy()   ;
-	  vz      = photon->vz()   ;
-	  eta     = photon->eta()  ;
-	  phi     = photon->phi()  ;
-	  pt      = photon->pt()   ;
-	  pdgID   = photon->pdgId();
+	  vx[nPhotons]      = photon->vx()   ;
+	  vy[nPhotons]      = photon->vy()   ;
+	  vz[nPhotons]      = photon->vz()   ;
+	  eta[nPhotons]     = photon->eta()  ;
+	  phi[nPhotons]     = photon->phi()  ;
+	  pt[nPhotons]      = photon->pt()   ;
+	  pdgID[nPhotons]   = photon->pdgId();
 	  
 	  std::cout << "PdgID: " << pdgID << " pt: " << pt << " eta: " << eta << " phi: " << phi << std::endl;
 	  
-	  onlyPhotons_->Fill();
+	  nPhotons++;
 	}
+
+      if (flag == 1) std::cout << "I found a photon(s)!" << std::endl;
       
     }
+  
+  onlyPhotons_->Fill();
   
 }
 // ------------ method called once each job just before starting event loop  ------------
@@ -105,14 +111,30 @@ simpleGenAnalyzer::beginJob()
   edm::Service<TFileService> fs;
 
   onlyPhotons_= fs->make<TTree>("PhotonTree","GenBarrelPhotonsOnly");
-  
-  onlyPhotons_->Branch("pdgID",&pdgID,"pdgID/I");   
-  onlyPhotons_->Branch("pt",&pt,"pt/D");	   
-  onlyPhotons_->Branch("eta",&eta,"eta/D");	   
-  onlyPhotons_->Branch("phi",&phi,"phi/D");	   
-  onlyPhotons_->Branch("vx",&vx,"vx/D");	   
-  onlyPhotons_->Branch("vy",&vy,"vy/D");	   
-  onlyPhotons_->Branch("vz",&vz,"vz/D");           
+
+  onlyPhotons_->Branch("event",&event,"event/I");
+  onlyPhotons_->Branch("run", &run, "run/I");
+  onlyPhotons_->Branch("lumi", &lumi, "lumi/I");
+
+  //const unsigned int MAXSIZE=1000;
+
+  //pdgID = new int[MAXSIZE];
+  //pt = new double[MAXSIZE];
+  //eta = new double[MAXSIZE];
+  //phi = new double[MAXSIZE];
+  //vx = new double[MAXSIZE];
+  //vy = new double[MAXSIZE];
+  //vz = new double[MAXSIZE];
+
+  onlyPhotons_->Branch("nPhotons", &nPhotons, "nPhotons/I");
+
+  onlyPhotons_->Branch("pdgID",pdgID,"pdgID[nPhotons]/I");   
+  onlyPhotons_->Branch("pt",pt,"pt[nPhotons]/D");	   
+  onlyPhotons_->Branch("eta",eta,"eta[nPhotons]/D");	   
+  onlyPhotons_->Branch("phi",phi,"phi[nPhotons]/D");	   
+  onlyPhotons_->Branch("vx",vx,"vx[nPhotons]/D");	   
+  onlyPhotons_->Branch("vy",vy,"vy[nPhotons]/D");	   
+  onlyPhotons_->Branch("vz",vz,"vz[nPhotons]/D");           
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
